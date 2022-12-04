@@ -1,0 +1,53 @@
+/**
+  ******************************************************************************
+  * @file    bsp_timer.c
+  * @author  fire
+  * @version V1.0
+  * @date    2013-xx-xx
+  * @brief   TIM2 1ms 定时应用bsp
+  ******************************************************************************
+  * @attention
+  *
+  * 实验平台:野火 iSO STM32 开发板 
+  * 论坛    :http://www.chuxue123.com
+  * 淘宝    :http://firestm32.taobao.com
+  *
+  ******************************************************************************
+  */ 
+
+#include "bsp_timer.h" 
+
+
+void TIM2_Config(void)
+{
+    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+	NVIC_InitTypeDef NVIC_InitStructure; 
+		
+	/* 设置TIM2CLK 为 72MHZ */
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2 , ENABLE);
+	
+	/* 自动重装载寄存器周期的值(计数值) */
+	TIM_DeInit(TIM2);
+    TIM_TimeBaseStructure.TIM_Period = 1000;
+    TIM_TimeBaseStructure.TIM_Prescaler= 71;
+    TIM_TimeBaseStructure.TIM_ClockDivision=TIM_CKD_DIV1;
+    TIM_TimeBaseStructure.TIM_CounterMode=TIM_CounterMode_Up; 
+    TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
+	
+    TIM_ClearFlag(TIM2, TIM_FLAG_Update);
+	
+    TIM_ITConfig(TIM2,TIM_IT_Update,ENABLE);
+		
+    TIM_Cmd(TIM2, ENABLE);
+//	TIM_SelectOutputTrigger(TIM2, TIM_TRGOSource_Update);	
+//	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2 , DISABLE);
+
+	//配置TIM2中断
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);  													
+    NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;	  
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;	
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+}
+/*********************************************END OF FILE**********************/
